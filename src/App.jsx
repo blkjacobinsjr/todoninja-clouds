@@ -159,7 +159,7 @@ function App() {
   }
 
   const quote = quotes[quoteIndex]
-  const isFocusRoute = window.location.pathname === '/focus'
+  const isFocusRoute = window.location.pathname !== '/'
   const cloudiness = remaining === 0 ? 0 : Math.min(1, 0.35 + remaining * 0.18)
   const weatherCloudCount = remaining === 0 ? 0 : Math.min(skyClouds.length, remaining + 2)
   const skyStyle = {
@@ -231,20 +231,20 @@ function App() {
               alt="Cute cloud ninja logo"
             />
             <p className="eyebrow">tiny todo dojo</p>
-            <h1 id="app-title">Catch the task. Make it a cloud.</h1>
+            <h1 id="app-title">one task, clear the clouds.</h1>
             <p className="lede">
               Add one todo. Watch it float. Tap the dot when done.
             </p>
 
             <form className="task-form" onSubmit={handleSubmit}>
               <label className="sr-only" htmlFor="task-input">
-                Add a todo
+                Add a task
               </label>
               <input
                 id="task-input"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Name the cloud"
+                placeholder="Name the task"
                 maxLength={MAX_TODO_LENGTH}
                 autoComplete="off"
               />
@@ -261,12 +261,12 @@ function App() {
             </div>
           </section>
 
-          <section className="cloud-board" aria-label="Todo cloud list">
+          <section className="cloud-board" aria-label="Task list">
             <div className="board-header">
               <div>
                 <p className="eyebrow">sky count</p>
                 <h2>
-                  {remaining} open {remaining === 1 ? 'cloud' : 'clouds'}
+                  {remaining} open {remaining === 1 ? 'task' : 'tasks'}
                 </h2>
               </div>
               <button
@@ -281,7 +281,7 @@ function App() {
 
             {todos.length === 0 ? (
               <div className="empty-cloud">
-                <p>No clouds yet.</p>
+                <p>No tasks yet.</p>
                 <span>First task becomes the weather.</span>
               </div>
             ) : (
@@ -355,13 +355,13 @@ function FocusView({
 
           <form className="task-form focus-task-form" onSubmit={handleSubmit}>
             <label className="sr-only" htmlFor="focus-task-input">
-              Add a focused todo
+              Add a focused task
             </label>
             <input
               id="focus-task-input"
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Name the cloud"
+              placeholder="Name the task"
               maxLength={MAX_TODO_LENGTH}
               autoComplete="off"
             />
@@ -374,7 +374,7 @@ function FocusView({
 
           <div className="focus-meta">
             <span>
-              {remaining} open {remaining === 1 ? 'cloud' : 'clouds'}
+              {remaining} open {remaining === 1 ? 'task' : 'tasks'}
             </span>
             <button
               className="ghost-button"
@@ -393,7 +393,7 @@ function FocusView({
 
           {todos.length === 0 ? (
             <div className="focus-empty">
-              <p>No clouds yet.</p>
+              <p>No tasks yet.</p>
               <span>Start with one clean task.</span>
             </div>
           ) : (

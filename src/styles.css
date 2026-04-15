@@ -139,8 +139,8 @@ button:disabled {
   position: absolute;
   top: var(--cloud-top);
   left: -52vmin;
-  width: 50vmin;
-  height: 24vmin;
+  width: min(50vmin, 380px);
+  height: min(24vmin, 180px);
   opacity: calc(var(--cloud-alpha) + var(--cloudiness) * 0.18);
   animation: weatherCloudDrift var(--cloud-duration) linear infinite;
   animation-delay: var(--cloud-delay);
@@ -393,21 +393,22 @@ button:disabled {
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 65%, transparent); /* Slightly dim eyebrow on day mode */
 }
 
-h1,
-h2,
-p {
-  margin-top: 0;
+.intro-panel p:not(.eyebrow, .lede),
+.cloud-board p:not(.eyebrow),
+.quote-strip p {
+  color: #111111; /* Ensure basic paragraphs are distinct on light BG */
 }
 
 h1 {
   max-width: 9.5em;
   margin-bottom: 14px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.8rem, 7.4vw, 6rem);
+  font-size: clamp(2.4rem, 7vw, 6rem); /* Reduce base size slightly on mobile */
   line-height: 0.92;
-  letter-spacing: 0;
+  letter-spacing: -0.01em; /* Tighten heading for better aesthetic */
 }
 
 .lede {
@@ -419,14 +420,15 @@ h1 {
 }
 
 .task-form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   width: min(100%, 540px);
   margin-bottom: 12px;
 }
 
 .task-form input {
+  flex: 1 1 300px;
   min-width: 0;
   height: 52px;
   padding: 0 18px;
@@ -448,6 +450,7 @@ h1 {
 }
 
 .task-form button {
+  flex: 0 0 auto;
   min-width: 92px;
   min-height: 52px;
   padding: 0 22px;
@@ -562,8 +565,8 @@ h1 {
   display: flex;
   align-items: center;
   /* Adjust min-height to accommodate the vertical span of the translated circles */
-  min-height: 25vmin;
-  margin-bottom: 2vmin;
+  min-height: min(25vmin, 200px);
+  margin-bottom: min(2vmin, 16px);
   isolation: isolate;
   /* Transform-only animation keeps the cloud motion cheap for the browser. */
   animation: cloudFloat var(--drift) ease-in-out infinite;
@@ -573,8 +576,8 @@ h1 {
 .cloud-group {
   position: relative;
   z-index: 1;
-  width: 100%;
-  min-height: 20vmin;
+  width: min(100%, 380px);
+  min-height: min(20vmin, 160px);
   transition:
     opacity 200ms ease,
     filter 200ms ease;
@@ -585,8 +588,8 @@ h1 {
 .cloud-bubble {
   position: absolute;
   background: white;
-  height: 20vmin;
-  width: 20vmin;
+  height: min(20vmin, 160px);
+  width: min(20vmin, 160px);
   border-radius: 50%;
   /* Remove border and individual shadows to allow merging */
   border: none;
@@ -603,25 +606,25 @@ h1 {
   transform: scale(1.02);
 }
 
-/* Verbatim translations from user example, adapted slightly for scale */
+/* Translations adapted for new scaling with max caps. Based on user example. */
 .cloud-bubble:nth-child(1) {
-  transform: translate(0vmin, 5vmin);
+  transform: translate(0vmin, min(5vmin, 40px));
 }
 
 .cloud-bubble:nth-child(2) {
-  transform: translate(14vmin, 8vmin);
+  transform: translate(min(14vmin, 112px), min(8vmin, 64px));
 }
 
 .cloud-bubble:nth-child(3) {
-  transform: translate(9vmin, -6vmin);
+  transform: translate(min(9vmin, 72px), min(-6vmin, -48px));
 }
 
 .cloud-bubble:nth-child(4) {
-  transform: translate(26vmin, -3vmin);
+  transform: translate(min(26vmin, 208px), min(-3vmin, -24px));
 }
 
 .cloud-bubble:nth-child(5) {
-  transform: translate(32vmin, 7vmin);
+  transform: translate(min(32vmin, 256px), min(7vmin, 56px));
 }
 
 .cloud-content {
@@ -630,7 +633,8 @@ h1 {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 8vmin 12vmin 5vmin 10vmin;
+  /* Adapted padding to use clamped values/mins where appropriate for responsiveness and sizing */
+  padding: min(8vmin, 64px) min(12vmin, 96px) min(5vmin, 40px) min(10vmin, 80px);
   pointer-events: none;
 }
 
@@ -655,29 +659,41 @@ h1 {
   background: rgba(255, 253, 247, 0.94);
   box-shadow: 0 8px 16px rgba(17, 31, 46, 0.08);
   pointer-events: auto;
+  /* Add transitions for hover effects on dots */
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.status-dot:hover,
+.delete-button:hover {
+  transform: translateY(calc(-50% - 1px)); /* For status-dot with translateY */
+  box-shadow: 0 10px 20px rgba(17, 31, 46, 0.12);
+}
+
+.delete-button:hover {
+   transform: translateY(-1px); /* Override status-dot translate for delete button */
 }
 
 .status-dot {
-  left: 2vmin;
+  left: min(2vmin, 16px);
   top: 50%;
-  width: 4vmin;
-  height: 4vmin;
+  width: min(4vmin, 32px);
+  height: min(4vmin, 32px);
   border-radius: 50%;
   transform: translateY(-50%);
 }
 
 .status-dot span {
-  width: 2vmin;
-  height: 2vmin;
+  width: min(2vmin, 16px);
+  height: min(2vmin, 16px);
   border-radius: 50%;
   background: transparent;
 }
 
 .delete-button {
-  right: 6vmin;
-  bottom: -1vmin;
-  width: 5vmin;
-  height: 5vmin;
+  right: min(6vmin, 48px);
+  bottom: min(-1vmin, -8px);
+  width: min(5vmin, 40px);
+  height: min(5vmin, 40px);
   border-radius: 50%;
   font-weight: 900;
   line-height: 1;
@@ -1123,6 +1139,7 @@ h1 {
 
   .hero-grid {
     grid-template-columns: 1fr;
+    gap: 22px;
   }
 
   .intro-panel,
@@ -1133,10 +1150,22 @@ h1 {
 
   .intro-panel {
     padding-top: 28px;
+    justify-content: start; /* Don't center vertically on mobile for flow */
+  }
+
+  .ninja-hero {
+    width: min(140px, 36vw);
+    margin-bottom: 22px;
+    align-self: flex-start; /* Align ninja left on mobile */
+  }
+  
+  .lede {
+     margin-bottom: 34px;
   }
 
   .task-form {
     grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .task-form button {
@@ -1146,14 +1175,31 @@ h1 {
   .board-header {
     align-items: stretch;
     flex-direction: column;
+    margin-bottom: 22px;
+  }
+  
+  .board-header h2 {
+     font-size: clamp(1.8rem, 6vw, 2.8rem);
   }
 
   .todo-list {
     grid-template-columns: 1fr;
+    padding-top: 18px;
   }
 
   .todo-cloud {
-    min-height: 150px;
+    min-height: min(25vmin, 140px); /* Reduce scaling on mobile */
+    margin-bottom: min(2vmin, 12px);
+  }
+  
+  .cloud-group {
+     width: min(100%, 340px);
+     min-height: min(20vmin, 120px);
+  }
+  
+  .cloud-bubble {
+     width: min(20vmin, 120px);
+     height: min(20vmin, 120px);
   }
 
   .cloud-card {
@@ -1172,18 +1218,31 @@ h1 {
     width: 84px;
     height: 84px;
   }
+  
+  .cloud-content {
+      padding: min(8vmin, 54px) min(12vmin, 80px) min(5vmin, 34px) min(10vmin, 66px);
+  }
+  
+  .cloud-content p {
+      font-size: clamp(0.95rem, 2.8vmin, 1.1rem);
+  }
 
   .status-dot {
-    left: 24px;
-    width: 28px;
-    height: 28px;
+    left: min(2vmin, 20px);
+    width: min(4vmin, 28px);
+    height: min(4vmin, 28px);
+  }
+  
+  .status-dot span {
+    width: min(2vmin, 14px);
+    height: min(2vmin, 14px);
   }
 
   .delete-button {
-    right: 20px;
-    bottom: 28px;
-    width: 34px;
-    height: 34px;
+    right: min(6vmin, 40px);
+    bottom: min(-1vmin, -6px);
+    width: min(5vmin, 34px);
+    height: min(5vmin, 34px);
   }
 
   .focus-hero {
@@ -1193,6 +1252,12 @@ h1 {
 
   .focus-panel {
     padding: 28px 20px;
+    border-radius: 24px;
+  }
+  
+  .focus-panel::before,
+  .focus-panel::after {
+     display: none; /* Hide illustrative clouds on mobile focus panel */
   }
 
   .focus-meta {
@@ -1203,6 +1268,10 @@ h1 {
 
   .focus-meta > span {
     justify-content: center;
+  }
+  
+  .focus-todo-list {
+      gap: 12px;
   }
 
   .example-cloud {
