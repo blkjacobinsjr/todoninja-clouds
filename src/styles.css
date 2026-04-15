@@ -2,15 +2,17 @@
   color: #111111;
   background: #7ed5ff;
   font-family:
-    "Trebuchet MS",
-    "Comic Sans MS",
+    ui-sans-serif,
     system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink: #111111;
-  --paper: #fffdf7;
-  --paper-soft: rgba(255, 253, 247, 0.78);
+  --paper: rgba(255, 253, 247, 0.92);
+  --paper-soft: rgba(255, 253, 247, 0.68);
   --sky-top: #63c8ff;
   --sky-mid: #bfeeff;
   --sky-low: #ffe4a7;
@@ -18,6 +20,8 @@
   --accent-strong: #ff735c;
   --cloud: #fffefa;
   --cloud-shadow: rgba(19, 83, 133, 0.2);
+  --cloudiness: 0;
+  --clarity: 1;
 }
 
 :root[data-theme="night"] {
@@ -48,11 +52,13 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
+  background: var(--sky-mid);
 }
 
 button,
 input {
   font: inherit;
+  letter-spacing: 0;
 }
 
 button {
@@ -67,20 +73,121 @@ button:disabled {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  /* Page gradient gives the sky depth while the logo and clouds stay flat. */
   background:
+    linear-gradient(180deg, rgb(180 194 203 / calc(var(--cloudiness) * 0.28)) 0%, rgb(146 157 164 / calc(var(--cloudiness) * 0.2)) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, transparent 46%),
     linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%);
+  transition: background 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-shell::before {
+  opacity: calc(0.18 + var(--cloudiness) * 0.26);
+  background:
+    radial-gradient(circle at 18% 16%, rgb(255 255 255 / calc(0.16 + var(--clarity) * 0.18)) 0 10%, transparent 11.5%),
+    radial-gradient(circle at 72% 30%, rgb(223 230 234 / calc(0.12 + var(--cloudiness) * 0.22)) 0 14%, transparent 15.5%),
+    radial-gradient(circle at 84% 70%, rgb(255 255 255 / calc(0.08 + var(--clarity) * 0.08)) 0 10%, transparent 11.5%),
+    linear-gradient(180deg, rgb(255 255 255 / calc(0.18 + var(--clarity) * 0.08)) 0%, transparent 34%),
+    linear-gradient(120deg, rgb(209 215 221 / calc(0.05 + var(--cloudiness) * 0.14)) 0%, transparent 26% 100%);
+  mix-blend-mode: screen;
+  filter: blur(2px);
+}
+
+.app-shell::after {
+  opacity: calc(0.05 + var(--cloudiness) * 0.14);
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.35) 0.8px, transparent 0.9px),
+    radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.9px);
+  background-size: 8px 8px, 13px 13px;
+  background-position: 0 0, 4px 6px;
+  mix-blend-mode: soft-light;
 }
 
 .sky-texture {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.34;
+  opacity: calc(0.12 + var(--cloudiness) * 0.12);
   background-image:
-    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.38) 0 2px, transparent 2px),
-    radial-gradient(circle at 72% 32%, rgba(255, 255, 255, 0.24) 0 1px, transparent 1px);
-  background-size: 72px 72px, 44px 44px;
+    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.48) 0 1px, transparent 1.2px),
+    radial-gradient(circle at 72% 32%, rgba(255, 255, 255, 0.28) 0 1px, transparent 1.2px);
+  background-size: 64px 64px, 38px 38px;
+}
+
+.weather-clouds {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: calc(0.2 + var(--cloudiness) * 0.8);
+  filter: saturate(calc(1 - var(--cloudiness) * 0.28));
+  transition:
+    opacity 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.weather-cloud {
+  position: absolute;
+  top: var(--cloud-top);
+  left: -52vmin;
+  width: 50vmin;
+  height: 24vmin;
+  opacity: calc(var(--cloud-alpha) + var(--cloudiness) * 0.18);
+  animation: weatherCloudDrift var(--cloud-duration) linear infinite;
+  animation-delay: var(--cloud-delay);
+  will-change: transform;
+}
+
+.weather-cloud span {
+  position: absolute;
+  display: block;
+  background: rgb(255 255 255 / calc(0.65 + var(--clarity) * 0.2));
+  border-radius: 999px;
+  box-shadow: 0 16px 36px rgb(76 114 136 / 0.1);
+}
+
+.weather-cloud span:nth-child(1) {
+  left: 0;
+  top: 40%;
+  width: 48%;
+  height: 48%;
+}
+
+.weather-cloud span:nth-child(2) {
+  left: 16%;
+  top: 12%;
+  width: 44%;
+  height: 58%;
+}
+
+.weather-cloud span:nth-child(3) {
+  left: 36%;
+  top: 0;
+  width: 40%;
+  height: 68%;
+}
+
+.weather-cloud span:nth-child(4) {
+  right: 6%;
+  top: 18%;
+  width: 44%;
+  height: 56%;
+}
+
+.weather-cloud span:nth-child(5) {
+  right: 0;
+  top: 48%;
+  width: 52%;
+  height: 44%;
 }
 
 .hero {
@@ -98,6 +205,60 @@ button:disabled {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 28px;
+}
+
+.top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.6);
+  box-shadow: 0 12px 24px rgba(17, 51, 78, 0.12);
+  backdrop-filter: blur(16px) saturate(135%);
+}
+
+.view-switcher-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: rgba(17, 17, 17, 0.72);
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.view-switcher-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.view-switcher-button:hover {
+  transform: translateY(-1px);
+  color: var(--ink);
+}
+
+.view-switcher-button.is-active {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 8px 18px rgba(17, 51, 78, 0.12);
 }
 
 .brand-mark {
@@ -119,11 +280,13 @@ button:disabled {
 
 .theme-toggle,
 .ghost-button,
-.task-form button {
-  border: 2px solid var(--ink);
+.task-form button,
+.mode-link {
+  border: 1px solid rgba(17, 17, 17, 0.18);
   color: var(--ink);
-  background: var(--paper);
-  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.18);
+  background: rgba(255, 253, 247, 0.76);
+  box-shadow: 0 14px 28px rgba(17, 51, 78, 0.14);
+  backdrop-filter: blur(16px) saturate(135%);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
@@ -132,16 +295,18 @@ button:disabled {
 
 .theme-toggle:hover,
 .ghost-button:hover:not(:disabled),
-.task-form button:hover {
-  transform: translate(-1px, -2px) rotate(-1deg);
-  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.2);
+.task-form button:hover,
+.mode-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(17, 51, 78, 0.16);
 }
 
 .theme-toggle:active,
 .ghost-button:active:not(:disabled),
-.task-form button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.2);
+.task-form button:active,
+.mode-link:active {
+  transform: translateY(1px);
+  box-shadow: 0 10px 20px rgba(17, 51, 78, 0.12);
 }
 
 .theme-toggle {
@@ -150,8 +315,18 @@ button:disabled {
   gap: 9px;
   min-height: 44px;
   padding: 9px 16px;
-  border-radius: 52% 48% 49% 51% / 42% 54% 46% 58%;
+  border-radius: 999px;
   font-weight: 900;
+}
+
+.mode-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .toggle-glyph {
@@ -175,11 +350,11 @@ button:disabled {
   position: relative;
   min-height: 620px;
   padding: clamp(22px, 4vw, 42px);
-  border: 3px solid var(--ink);
-  border-radius: 26px 18px 31px 22px / 21px 30px 20px 28px;
-  background: var(--paper-soft);
-  box-shadow: 10px 12px 0 rgba(0, 0, 0, 0.14);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.56));
+  box-shadow: 0 26px 70px rgba(17, 51, 78, 0.16);
+  backdrop-filter: blur(18px) saturate(145%);
 }
 
 .intro-panel {
@@ -196,19 +371,19 @@ button:disabled {
   bottom: -24px;
   width: 180px;
   height: 94px;
-  border: 2px solid rgba(17, 17, 17, 0.22);
-  border-radius: 58% 42% 51% 49% / 46% 54% 43% 57%;
-  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
   transform: rotate(-5deg);
 }
 
 .ninja-hero {
   width: min(170px, 42vw);
   height: auto;
-  border: 3px solid var(--ink);
-  border-radius: 31px 23px 34px 25px / 24px 32px 22px 30px;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  border-radius: 24px;
   margin-bottom: 14px;
-  filter: drop-shadow(0 16px 20px rgba(33, 96, 148, 0.18));
+  filter: drop-shadow(0 16px 28px rgba(33, 96, 148, 0.16));
   animation: floatHero 6s ease-in-out infinite;
 }
 
@@ -229,64 +404,68 @@ p {
 h1 {
   max-width: 9.5em;
   margin-bottom: 14px;
-  font-size: clamp(3rem, 8vw, 6.5rem);
-  line-height: 0.88;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.8rem, 7.4vw, 6rem);
+  line-height: 0.92;
   letter-spacing: 0;
 }
 
 .lede {
-  max-width: 34rem;
+  max-width: 32rem;
   margin-bottom: 24px;
   font-size: clamp(1rem, 2.3vw, 1.25rem);
   line-height: 1.45;
-  color: color-mix(in srgb, var(--ink) 82%, transparent);
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
 }
 
 .task-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
-  width: min(100%, 560px);
+  width: min(100%, 540px);
   margin-bottom: 12px;
 }
 
 .task-form input {
   min-width: 0;
-  height: 56px;
+  height: 52px;
   padding: 0 18px;
-  border: 2px solid var(--ink);
-  border-radius: 25px 19px 23px 18px / 20px 25px 19px 24px;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 18px;
   color: var(--ink);
-  background: var(--paper);
-  box-shadow: inset 2px 3px 0 rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 24px rgba(17, 51, 78, 0.08);
   outline: none;
 }
 
 .task-form input:focus {
   box-shadow:
-    inset 2px 3px 0 rgba(0, 0, 0, 0.08),
-    0 0 0 4px rgba(255, 207, 90, 0.48);
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 0 0 4px rgba(255, 207, 90, 0.28),
+    0 10px 24px rgba(17, 51, 78, 0.08);
 }
 
 .task-form button {
   min-width: 92px;
-  min-height: 56px;
+  min-height: 52px;
   padding: 0 22px;
-  border-radius: 56% 44% 52% 48% / 43% 57% 43% 57%;
+  border-radius: 18px;
   font-weight: 900;
   background:
-    linear-gradient(135deg, var(--accent), #fffdf7 78%);
+    linear-gradient(135deg, rgba(255, 207, 90, 0.94), rgba(255, 253, 247, 0.96) 80%);
 }
 
 .sketch-progress {
   width: min(100%, 560px);
   height: 8px;
   margin-bottom: 22px;
-  border: 2px solid var(--ink);
+  border: 1px solid rgba(17, 17, 17, 0.16);
   border-radius: 999px;
   overflow: hidden;
   opacity: 0;
-  background: var(--paper);
+  background: rgba(255, 255, 255, 0.72);
   transform: translateY(-4px);
 }
 
@@ -315,14 +494,17 @@ h1 {
   z-index: 1;
   width: min(100%, 560px);
   padding: 16px 18px;
-  border: 2px solid var(--ink);
-  border-radius: 20px 28px 18px 24px / 25px 18px 29px 17px;
-  background: var(--paper);
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 253, 247, 0.72);
+  box-shadow: 0 12px 28px rgba(17, 51, 78, 0.08);
+  backdrop-filter: blur(14px) saturate(135%);
 }
 
 .quote-strip p {
   margin-bottom: 5px;
   font-weight: 900;
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 .quote-strip span {
@@ -346,14 +528,15 @@ h1 {
 
 .board-header h2 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.6rem);
-  line-height: 0.9;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.94;
 }
 
 .ghost-button {
   min-height: 44px;
   padding: 8px 14px;
-  border-radius: 19px 24px 17px 22px / 24px 16px 25px 18px;
+  border-radius: 16px;
   font-weight: 900;
 }
 
@@ -366,57 +549,175 @@ h1 {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 24px 20px;
+  grid-template-columns: 1fr;
+  gap: 14px;
   width: 100%;
   margin: 0;
-  padding: 12px 0 0;
+  padding: 24px 0 0;
   list-style: none;
 }
 
 .todo-cloud {
   position: relative;
-  min-height: 138px;
+  display: flex;
+  align-items: center;
+  /* Adjust min-height to accommodate the vertical span of the translated circles */
+  min-height: 25vmin;
+  margin-bottom: 2vmin;
+  isolation: isolate;
   /* Transform-only animation keeps the cloud motion cheap for the browser. */
   animation: cloudFloat var(--drift) ease-in-out infinite;
   animation-delay: var(--delay);
 }
 
-.cloud-card {
+.cloud-group {
   position: relative;
-  min-height: 124px;
-  padding: 35px 42px 26px 52px;
-  border: 2px solid var(--ink);
-  border-radius: 52% 48% 50% 50% / 44% 48% 52% 56%;
-  color: #111111;
-  background: var(--cloud);
-  box-shadow: 7px 10px 0 var(--cloud-shadow);
+  z-index: 1;
+  width: 100%;
+  min-height: 20vmin;
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
+  /* Apply shadow to the merged outer silhouette only */
+  filter: drop-shadow(0 14px 28px rgba(55, 101, 122, 0.08));
 }
 
-/* The cloud bumps are CSS pseudo-elements, so every todo stays one light DOM item. */
+.cloud-bubble {
+  position: absolute;
+  background: white;
+  height: 20vmin;
+  width: 20vmin;
+  border-radius: 50%;
+  /* Remove border and individual shadows to allow merging */
+  border: none;
+  background: var(--cloud);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cloud-group:hover {
+  filter: drop-shadow(0 20px 40px rgba(55, 101, 122, 0.12));
+}
+
+.cloud-group:hover .cloud-bubble {
+  transform: scale(1.02);
+}
+
+/* Verbatim translations from user example, adapted slightly for scale */
+.cloud-bubble:nth-child(1) {
+  transform: translate(0vmin, 5vmin);
+}
+
+.cloud-bubble:nth-child(2) {
+  transform: translate(14vmin, 8vmin);
+}
+
+.cloud-bubble:nth-child(3) {
+  transform: translate(9vmin, -6vmin);
+}
+
+.cloud-bubble:nth-child(4) {
+  transform: translate(26vmin, -3vmin);
+}
+
+.cloud-bubble:nth-child(5) {
+  transform: translate(32vmin, 7vmin);
+}
+
+.cloud-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8vmin 12vmin 5vmin 10vmin;
+  pointer-events: none;
+}
+
+.cloud-content p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(1rem, 2vmin, 1.2rem);
+  font-weight: 900;
+  line-height: 1.18;
+  color: #111111;
+  pointer-events: auto;
+}
+
+.status-dot,
+.delete-button {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  color: #111111;
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: 0 8px 16px rgba(17, 31, 46, 0.08);
+  pointer-events: auto;
+}
+
+.status-dot {
+  left: 2vmin;
+  top: 50%;
+  width: 4vmin;
+  height: 4vmin;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.status-dot span {
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.delete-button {
+  right: 6vmin;
+  bottom: -1vmin;
+  width: 5vmin;
+  height: 5vmin;
+  border-radius: 50%;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cloud-card:hover {
+  transform: translateY(-3px) scale(1.008);
+  box-shadow:
+    0 28px 58px rgba(55, 101, 122, 0.18),
+    0 10px 30px rgba(55, 101, 122, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -4px 16px rgba(0, 0, 0, 0.02);
+}
+
+/* Cloud bumps — multiple circles that merge into an organic cloud silhouette */
 .cloud-card::before,
 .cloud-card::after {
   content: "";
   position: absolute;
   z-index: -1;
-  border: 2px solid var(--ink);
-  background: var(--cloud);
+  border: 1px solid rgba(164, 161, 154, 0.16);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 252, 0.97), rgba(249, 247, 239, 0.9));
+  box-shadow:
+    0 14px 28px rgba(55, 101, 122, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
 }
 
 .cloud-card::before {
-  top: -24px;
-  left: 44px;
-  width: 86px;
-  height: 78px;
-  border-radius: 53% 47% 51% 49% / 50% 46% 54% 50%;
+  top: -42px;
+  left: 8%;
+  width: clamp(120px, 24%, 190px);
+  height: clamp(120px, 24%, 190px);
 }
 
 .cloud-card::after {
-  top: -11px;
-  right: 22px;
-  width: 76px;
-  height: 65px;
-  border-radius: 46% 54% 47% 53% / 50% 44% 56% 50%;
+  top: -32px;
+  right: 6%;
+  width: clamp(100px, 20%, 160px);
+  height: clamp(100px, 20%, 160px);
 }
 
 .cloud-card p {
@@ -424,14 +725,36 @@ h1 {
   z-index: 2;
   margin: 0;
   overflow-wrap: anywhere;
-  font-size: 1.02rem;
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
   font-weight: 900;
-  line-height: 1.25;
+  line-height: 1.18;
 }
 
-.todo-cloud.is-done .cloud-card {
-  opacity: 0.72;
-  transform: rotate(-1deg);
+.todo-cloud.is-done .cloud-group {
+  opacity: 0.6;
+  filter: saturate(0.7);
+}
+
+.todo-cloud.is-done .cloud-content p {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.todo-cloud.is-done .status-dot span {
+  background: var(--accent-strong);
+}
+
+.weather-clouds {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: calc(0.2 + var(--cloudiness) * 0.8);
+  filter: saturate(calc(1 - var(--cloudiness) * 0.28));
+  transition:
+    opacity 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .todo-cloud.is-done .cloud-card p {
@@ -445,22 +768,24 @@ h1 {
   z-index: 3;
   display: grid;
   place-items: center;
-  border: 2px solid #111111;
+  border: 1px solid rgba(17, 17, 17, 0.18);
   color: #111111;
-  background: #fffdf7;
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: 0 8px 16px rgba(17, 31, 46, 0.08);
 }
 
 .status-dot {
-  left: 17px;
-  top: 49px;
-  width: 25px;
-  height: 25px;
+  left: 34px;
+  top: 50%;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+  transform: translateY(-50%);
 }
 
 .status-dot span {
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: transparent;
 }
@@ -470,11 +795,11 @@ h1 {
 }
 
 .delete-button {
-  right: 14px;
-  bottom: 20px;
-  width: 28px;
-  height: 28px;
-  border-radius: 57% 43% 52% 48% / 46% 54% 46% 54%;
+  right: 28px;
+  bottom: 34px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   font-weight: 900;
   line-height: 1;
 }
@@ -494,10 +819,10 @@ h1 {
   content: "";
   position: absolute;
   inset: 28px 36px;
-  border: 2px solid var(--ink);
-  border-radius: 52% 48% 50% 50% / 45% 52% 48% 55%;
-  background: var(--cloud);
-  box-shadow: 7px 10px 0 var(--cloud-shadow);
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 44% 56% 50% 50% / 46% 52% 48% 54%;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 32px rgba(17, 51, 78, 0.1);
 }
 
 .empty-cloud p,
@@ -520,20 +845,186 @@ h1 {
   position: absolute;
   z-index: 0;
   padding: 12px 18px;
-  border: 2px solid rgba(17, 17, 17, 0.28);
-  border-radius: 50% 48% 52% 50% / 45% 53% 47% 55%;
-  color: rgba(17, 17, 17, 0.52);
-  background: rgba(255, 255, 255, 0.36);
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 18px;
+  color: rgba(17, 17, 17, 0.44);
+  background: rgba(255, 255, 255, 0.26);
   font-size: 0.86rem;
   font-weight: 900;
   animation: backgroundDrift 13s ease-in-out infinite;
   animation-delay: var(--delay);
 }
 
+:root[data-theme="night"] .theme-toggle,
+:root[data-theme="night"] .ghost-button,
+:root[data-theme="night"] .mode-link {
+  border-color: rgba(255, 253, 247, 0.18);
+  color: var(--ink);
+  background: rgba(8, 13, 24, 0.72);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="night"] .intro-panel,
+:root[data-theme="night"] .cloud-board {
+  border-color: rgba(255, 253, 247, 0.16);
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.78), rgba(8, 13, 24, 0.58));
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="night"] .intro-panel::after,
+:root[data-theme="night"] .quote-strip {
+  border-color: rgba(255, 253, 247, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="night"] .ninja-hero,
+:root[data-theme="night"] .task-form input,
+:root[data-theme="night"] .sketch-progress {
+  border-color: rgba(255, 253, 247, 0.16);
+  background: rgba(8, 13, 24, 0.72);
+}
+
+:root[data-theme="night"] .task-form input {
+  color: var(--ink);
+}
+
+:root[data-theme="night"] .task-form input::placeholder {
+  color: rgba(255, 253, 247, 0.5);
+}
+
+:root[data-theme="night"] .task-form button {
+  color: #111111;
+}
+
+.focus-shell {
+  overflow-y: auto;
+}
+
+.focus-hero {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 24px 0 42px;
+}
+
+.focus-top-bar {
+  margin-bottom: clamp(26px, 7vh, 76px);
+}
+
+.focus-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(780px, 100%);
+  margin: 0 auto;
+  padding: clamp(30px, 5vw, 58px);
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.56));
+  box-shadow: 0 30px 80px rgba(17, 51, 78, 0.16);
+  text-align: center;
+  backdrop-filter: blur(20px) saturate(145%);
+}
+
+.focus-panel::before,
+.focus-panel::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.focus-panel::before {
+  top: -74px;
+  left: -88px;
+  width: 250px;
+  height: 128px;
+  background: rgba(190, 223, 236, 0.28);
+}
+
+.focus-panel::after {
+  right: -92px;
+  bottom: -64px;
+  width: 280px;
+  height: 150px;
+  background: rgba(255, 213, 106, 0.2);
+  transform: rotate(-5deg);
+}
+
+.focus-panel h1 {
+  max-width: 8.8em;
+  margin-bottom: 16px;
+}
+
+.focus-panel .lede {
+  margin-bottom: 28px;
+}
+
+.focus-task-form {
+  width: min(100%, 580px);
+}
+
+.focus-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.focus-meta > span {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.focus-quote {
+  margin-bottom: 24px;
+}
+
+.focus-empty {
+  padding: 20px 24px;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.focus-empty p {
+  margin-bottom: 5px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.focus-todo-list {
+  width: min(100%, 620px);
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+:root[data-theme="night"] .focus-panel {
+  border-color: rgba(255, 253, 247, 0.16);
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.78), rgba(8, 13, 24, 0.58));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);
+}
+
+:root[data-theme="night"] .focus-meta > span {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 :root[data-theme="night"] .example-cloud {
   color: rgba(255, 253, 247, 0.62);
-  border-color: rgba(255, 253, 247, 0.25);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 253, 247, 0.16);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .sr-only {
@@ -551,10 +1042,10 @@ h1 {
 @keyframes cloudFloat {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(-0.7deg);
+    transform: translate3d(var(--cloud-shift, 0), 0, 0) rotate(calc(var(--cloud-tilt, 0deg) - 0.45deg));
   }
   50% {
-    transform: translate3d(0, -9px, 0) rotate(0.8deg);
+    transform: translate3d(var(--cloud-counter-shift, 0), -12px, 0) rotate(calc(var(--cloud-tilt, 0deg) + 0.55deg));
   }
 }
 
@@ -590,6 +1081,15 @@ h1 {
   }
 }
 
+@keyframes weatherCloudDrift {
+  from {
+    transform: translate3d(-18vw, 0, 0) scale(var(--cloud-scale));
+  }
+  to {
+    transform: translate3d(165vw, 0, 0) scale(var(--cloud-scale));
+  }
+}
+
 @keyframes sketchLoad {
   from {
     transform: translateX(-105%);
@@ -606,7 +1106,19 @@ h1 {
   }
 
   .top-bar {
+    align-items: flex-start;
     margin-bottom: 14px;
+  }
+
+  .top-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .mode-link,
+  .theme-toggle {
+    min-height: 40px;
+    padding: 8px 12px;
   }
 
   .hero-grid {
@@ -638,6 +1150,59 @@ h1 {
 
   .todo-list {
     grid-template-columns: 1fr;
+  }
+
+  .todo-cloud {
+    min-height: 150px;
+  }
+
+  .cloud-card {
+    min-height: 120px;
+    padding: 38px 54px 30px 64px;
+  }
+
+  .cloud-card::before {
+    top: -32px;
+    width: 100px;
+    height: 100px;
+  }
+
+  .cloud-card::after {
+    top: -24px;
+    width: 84px;
+    height: 84px;
+  }
+
+  .status-dot {
+    left: 24px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .delete-button {
+    right: 20px;
+    bottom: 28px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .focus-hero {
+    width: min(100% - 22px, 640px);
+    padding-top: 14px;
+  }
+
+  .focus-panel {
+    padding: 28px 20px;
+  }
+
+  .focus-meta {
+    align-items: stretch;
+    flex-direction: column;
+    width: min(100%, 580px);
+  }
+
+  .focus-meta > span {
+    justify-content: center;
   }
 
   .example-cloud {

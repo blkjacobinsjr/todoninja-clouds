@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "paper:open": "node scripts/paper-mcp.mjs open",
+    "paper:mcp": "node scripts/paper-mcp.mjs check",
+    "paper:focus-artboard": "node scripts/paper-mcp.mjs focus-artboard",
+    "paper:bubble-artboard": "node scripts/paper-mcp.mjs bubble-artboard"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.2",
